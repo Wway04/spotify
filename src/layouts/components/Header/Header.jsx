@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Button from "../../../components/Button";
 import "./Header.scss";
 
@@ -14,8 +15,12 @@ function Header() {
           </button>
         </div>
         <div className="header-btns">
-          <Button type="large">Sign up</Button>
-          <Button type="large">Register</Button>
+          <Link to="/login">
+            <Button type="large">Sign up</Button>
+          </Link>
+          <Link to="/register">
+            <Button type="large">Register</Button>
+          </Link>
         </div>
       </div>
       <div className="mt-3 w-100 header-search-type">
