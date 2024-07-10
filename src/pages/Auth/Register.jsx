@@ -1,9 +1,7 @@
-import { useState } from "react";
 import "./Auth.scss";
 
 import { Link } from "react-router-dom";
 function Register() {
-  const [isShowPassword, setIsShowPassword] = useState(false);
   return (
     <div className="register">
       <header className="register-header">
@@ -31,24 +29,10 @@ function Register() {
 
           <div className="register-links">
             <a href="#" className="register-link-btn">
-              <button>
-                <img
-                  src="https://cdn.pixabay.com/photo/2021/05/24/09/15/google-logo-6278331_1280.png"
-                  alt=""
-                  width="16px"
-                />
-                Continue with Facebook
-              </button>
+              <button>Continue with Facebook</button>
             </a>
             <a href="#" className="register-link-btn">
-              <button>
-                <img
-                  src="https://cdn.pixabay.com/photo/2021/05/24/09/15/google-logo-6278331_1280.png"
-                  alt=""
-                  width="16px"
-                />
-                Continue with Apple
-              </button>
+              <button>Continue with Apple</button>
             </a>
             <a href="#" className="register-link-btn">
               <button>Continue with Google</button>
