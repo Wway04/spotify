@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import "./Auth.scss";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { handleValidate } from "../../functions/handleValidate";
+import { spotifyAPIGet } from "../../utils/httpRequest";
 
 const CLIENT_ID = "bcb629904e374fdfb0f99db29dd3e8a3";
 const REDIRECT_URI = "http://localhost:3000/login";
@@ -12,25 +13,12 @@ const RESPONSE_TYPE = "token";
 function Login() {
   // Get user id spotify account
   const getUserId = async (token) => {
-    await axios
-      .get("https://api.spotify.com/v1/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then(function (response) {
-        localStorage.setItem("user_id", response.data.id);
-      })
-      .catch(function (error) {
-        if (error.response) {
-          console.log("Server responded with status code:", error.response.status);
-          console.log("Response data:", error.response.data);
-        } else if (error.request) {
-          console.log("No response received:", error.request);
-        } else {
-          console.log("Error creating request:", error.message);
-        }
-      });
+    try {
+      const { id } = await spotifyAPIGet("/me");
+      localStorage.setItem("user_id", id);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
   // Get token spotify account information from server and retrieve user information from server using token information
   useEffect(() => {
@@ -62,75 +50,41 @@ function Login() {
 
   // information login form
   const [email, setEmail] = useState();
+
   const [emailErrorMessage, setEmailErrorMessage] = useState();
   const [password, setPassword] = useState();
   const [passwordErrorMessage, setPasswordErrorMessage] = useState();
-
   const [isError, setIsError] = useState(false);
+
+  const [isShowPassword, setIsShowPassword] = useState(false);
 
   // handle onchange event for email and password errors
   const handleEmail = (e) => {
     setIsError(false);
     setEmailErrorMessage("");
+    setPasswordErrorMessage("");
     setEmail(e.target.value);
   };
   const handlePassword = (e) => {
     setIsError(false);
+    setEmailErrorMessage("");
     setPasswordErrorMessage("");
     setPassword(e.target.value);
   };
-
-  const handleValidate = (type) => {
-    const emailRegex = new RegExp(/^[A-Za-z0-9_!#$%&'*+\/=?`{|}~^.-]+@[A-Za-z0-9.-]+$/, "gm");
-    if (type === "email") {
-      if (!email) {
-        setEmailErrorMessage("Please enter your email.");
-        return false;
-      }
-      setEmailErrorMessage("");
-      return true;
-    } else if (type === "password") {
-      if (!password) {
-        setPasswordErrorMessage("Please enter your password.");
-        return false;
-      }
-      setPasswordErrorMessage("");
-      return true;
-    }
-    if (!(password === "123123123")) return false;
-    if (!emailRegex.test(email)) return false;
-    return true;
-  };
-
   const handleSubmit = (e) => {
-    if (!handleValidate("email") && !handleValidate("password")) {
-      e.preventDefault();
+    e.preventDefault();
+    const isEmail = handleValidate("email", email);
+    const isPassword = handleValidate("password", password);
+    if (!isEmail.isValid || !isPassword.isValid) {
+      setEmailErrorMessage(isEmail.message);
+      setPasswordErrorMessage(isPassword.message);
       setIsError(true);
       emailInput.current.focus();
+      console.log("test");
       return;
     }
-
-    if (!handleValidate("email")) {
-      e.preventDefault();
-      setIsError(true);
-      emailInput.current.focus();
-      return;
-    }
-    if (!handleValidate("password")) {
-      e.preventDefault();
-      setIsError(true);
-      passwordInput.current.focus();
-      return;
-    }
-    if (!handleValidate) {
-      e.preventDefault();
-      setIsError(true);
-      return;
-    }
+    window.location.href = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=playlist-modify-private`;
   };
-
-  const [isShowPassword, setIsShowPassword] = useState(false);
-  const [token, setToken] = useState("");
 
   return (
     <div className="login">
@@ -156,41 +110,6 @@ function Login() {
                 </div>
               </div>
             )}
-            <div className="login-links">
-              <a href="#" className="login-link-btn">
-                <button>
-                  <img
-                    src="https://cdn.pixabay.com/photo/2021/05/24/09/15/google-logo-6278331_1280.png"
-                    alt=""
-                    width="16px"
-                  />
-                  Continue with Google
-                </button>
-              </a>
-              <a href="#" className="login-link-btn">
-                <button>
-                  <img
-                    src="https://cdn.pixabay.com/photo/2021/05/24/09/15/google-logo-6278331_1280.png"
-                    alt=""
-                    width="16px"
-                  />
-                  Continue with Facebook
-                </button>
-              </a>
-              <a href="#" className="login-link-btn">
-                <button>
-                  <img
-                    src="https://cdn.pixabay.com/photo/2021/05/24/09/15/google-logo-6278331_1280.png"
-                    alt=""
-                    width="16px"
-                  />
-                  Continue with Apple
-                </button>
-              </a>
-              <a href="#" className="login-link-btn">
-                <button>Continue with Google</button>
-              </a>
-            </div>
             <div className="w-75 login-divider" style={{ height: "28px" }}></div>
             <form className="login-form">
               <div className={`login-form-group ${emailErrorMessage ? "error" : ""}`}>
@@ -216,7 +135,7 @@ function Login() {
                   placeholder="Enter email..."
                   value={email}
                   onChange={handleEmail}
-                  onBlur={() => handleValidate("email")}
+                  onBlur={() => handleValidate("email", email)}
                 />
                 {emailErrorMessage && (
                   <p id="error-message" style={{ fontSize: "14px", fontWeight: 400 }}>
@@ -273,13 +192,7 @@ function Login() {
                   </p>
                 )}
               </div>
-              <button onClick={handleSubmit}>
-                <a
-                  href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=playlist-modify-private`}
-                >
-                  Login to Spotify
-                </a>
-              </button>
+              <button onClick={handleSubmit}>Login to Spotify</button>
               <div className="text-center mt-4 hover-link forgot-password ">
                 <a href="#">Forgot your password?</a>
               </div>
