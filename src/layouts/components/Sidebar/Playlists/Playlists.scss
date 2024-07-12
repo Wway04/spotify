@@ -1,6 +1,7 @@
 .playlists {
   .playlist-item {
-    position: relative;
+    display: flex;
+    justify-content: space-between;
     height: 64px;
     padding: 8px;
     &:hover {
@@ -35,13 +36,37 @@
     }
   }
   .playlist-options {
-    position: absolute;
-    top: 50%;
-    right: 20px;
-    transform: translateY(-50%);
     padding: 10px;
-    .ant-dropdown-menu {
-      background-color: red !important;
+
+    a {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+      color: #000 !important;
+      &:active {
+        color: #fff !important;
+      }
+    }
+    i {
+      font-size: 16px !important;
+    }
+    button {
+      background-color: transparent;
+      border: none;
+      color: #a7a7a7;
+      cursor: pointer;
+      &:hover {
+        color: #fff;
+      }
+      &:active {
+        background-color: transparent;
+      }
+    }
+    .dropdown-toggle::after {
+      display: inline-block;
+      content: "";
+      border: 0;
     }
   }
 }

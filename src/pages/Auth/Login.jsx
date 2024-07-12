@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import "./Auth.scss";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { handleValidate } from "../../functions/handleValidate";
 import { spotifyAPIGet } from "../../utils/httpRequest";
+import { AppContext } from "../../App";
 
 const CLIENT_ID = "bcb629904e374fdfb0f99db29dd3e8a3";
 const REDIRECT_URI = "http://localhost:3000/login";
@@ -16,6 +17,7 @@ function Login() {
     try {
       const { id } = await spotifyAPIGet("/me");
       localStorage.setItem("user_id", id);
+      navigate("/");
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -36,7 +38,6 @@ function Login() {
         if (!localStorage.getItem("user_id")) {
           await getUserId(token);
         }
-        navigate("/");
       }
     }
     getTokenAndIdUser();
@@ -80,10 +81,9 @@ function Login() {
       setPasswordErrorMessage(isPassword.message);
       setIsError(true);
       emailInput.current.focus();
-      console.log("test");
       return;
     }
-    window.location.href = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=playlist-modify-private`;
+    window.location.href = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope= playlist-modify-private`;
   };
 
   return (

@@ -1,8 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../../../components/Button";
 import "./Header.scss";
 
 function Header() {
+  const token = localStorage.getItem("token");
+
+  console.log("🚀 ~ Header ~ token:", token);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user_id");
+    navigate("/login");
+  };
+
   return (
     <header className="header">
       <div className="header-inner">
@@ -15,20 +26,18 @@ function Header() {
           </button>
         </div>
         <div className="header-btns">
-          <Link to="/login">
-            <Button type="large">Sign up</Button>
-          </Link>
-          <Link to="/register">
-            <Button type="large">Register</Button>
-          </Link>
-        </div>
-      </div>
-      <div className="mt-3 w-100 header-search-type">
-        <div className="d-flex gap-2 types">
-          <Button type="type">Track</Button>
-          <Button type="type">Artists</Button>
-          <Button type="type">Playlists</Button>
-          <Button type="type">Albums</Button>
+          {token ? (
+            <Button onClick={handleLogout}>Log out</Button>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button type="large">Sign up</Button>
+              </Link>
+              <Link to="/register">
+                <Button type="large">Register</Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
